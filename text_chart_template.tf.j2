@@ -1,0 +1,9 @@
+resource "signalfx_list_chart" "{{ terraformName }}" {
+    name                = "{{ name }}"
+    {% if description != "" %}
+    description         = "{{ description }}"
+    {% endif %}
+    markdown = <<-EOF
+      {{ options.markdown }}
+    EOF
+}

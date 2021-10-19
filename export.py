@@ -45,6 +45,8 @@ def do_chart(client, chartId, name):
         return do_list_chart(client, c)
     elif c['options']['type'] == 'SingleValue':
         return do_single_value_chart(client, c)
+    elif c['options']['type'] == 'Text':
+        return do_text_chart(client,c)
     # elif c['options']['type'] == 'TimeSeriesChart':
     #     print(c)
     #     do_list_chart(client, c, name)
@@ -54,6 +56,8 @@ def do_chart(client, chartId, name):
 def resolve_color(index):
     return COLORS[index]
 
+def do_text_chart(client,chart):
+    return text_chart_template.render(chart)
 def do_list_chart(client, chart):
     return list_chart_template.render(chart)
 
@@ -106,6 +110,7 @@ dashboard_template = env.get_template('dashboard_template.tf.j2')
 detector_template = env.get_template('detector_template.tf.j2')
 list_chart_template = env.get_template('list_chart_template.tf.j2')
 time_chart_template = env.get_template('time_chart_template.tf.j2')
+text_chart_template = env.get_template('text_chart_template.tf.j2')
 
 if args.chart is None and args.dashboard is None and args.detector is None:
     sys.exit('Please supply a chart, dashboard, or detector ID to export')
