@@ -35,31 +35,38 @@ COLORS = [
 ]
 
 def do_chart(client, chartId, name):
+    # print('do chart info:', client, chartId, name)
     c = client.get_chart(chartId)
+    
     c['terraformName'] = name
     if c['options']['type'] == 'TimeSeriesChart':
-        do_time_chart(client, c, name)
+        return do_time_chart(client, c)
     elif c['options']['type'] == 'List':
-        do_list_chart(client, c, name)
+        return do_list_chart(client, c)
+    elif c['options']['type'] == 'SingleValue':
+        return do_single_value_chart(client, c)
     # elif c['options']['type'] == 'TimeSeriesChart':
     #     print(c)
     #     do_list_chart(client, c, name)
     else:
-        print(c['options']['type'])
-        print("TKTK")
+        return c['options']['type']
 
 def resolve_color(index):
     return COLORS[index]
 
-def do_list_chart(client, chart, name):
-    print(list_chart_template.render(chart))
+def do_list_chart(client, chart):
+    return list_chart_template.render(chart)
 
-def do_single_value_chart(client, chart, name):
-    print(single_value_chart_template.render(chart))
+def do_single_value_chart(client, chart): 
+    return single_value_chart_template.render(chart)
 
 def do_dashboard(client, dashboardId, name):
     d = client.get_dashboard(dashboardId)
     d['terraformName'] = name
+    new_charts = []
+    for chart in d['charts']:
+        new_charts.append(do_chart(client, chart['chartId'], name))
+    d['newCharts'] = new_charts
     print(dashboard_template.render(d))
 
 def do_detector(client, detectorId, name):
@@ -67,9 +74,11 @@ def do_detector(client, detectorId, name):
     d['terraformName'] = name
     print(detector_template.render(d))
 
-def do_time_chart(client, chart, name):
-    print(time_chart_template.render(chart))
-    sys.exit(1)
+def do_time_chart(client, chart):
+    # print(chart)
+
+    return time_chart_template.render(chart)
+    # sys.exit(1)
 
 parser = argparse.ArgumentParser()
 
@@ -108,8 +117,8 @@ if __name__ == "__main__":
         sfx = signalfx.SignalFx(api_endpoint='https://api.' + args.realm + '.signalfx.com')
 
     with sfx.rest(sfx_api_key) as rest:
-        def do_chart_template(chartId):
-            do_chart(rest, chartId, 'TKTKnamehere')
+        def do_chart_template(chartId, name):
+            do_chart(rest, chartId, name)
 
         env.globals.update(do_chart=do_chart_template)
         env.globals.update(resolve_color=resolve_color)

@@ -1,6 +1,4 @@
-{% for chart in charts %}
-{{ do_chart(chart.chartId) }}
-{% endfor %}
+
 resource "signalfx_dashboard" "{{ terraformName }}" {
     name                = "{{ name }}"
     dashboard_group     = "{{ groupId }}"
@@ -10,8 +8,17 @@ resource "signalfx_dashboard" "{{ terraformName }}" {
     chart_resolution    = "{{ chartDensity | lower }}"
 
     {% for chart in charts %}
-    chart {
-
-    }
+  chart {
+    chart_id = {{chart['chartId']}}
+    width    = {{chart['width']}}
+    height   = {{chart['height']}}
+    row      = {{chart['row']}}
+    column   = {{chart['column']}}
+  }
     {% endfor %}
+
 }
+
+{% for chart in newCharts %}
+    {{ chart }}
+{% endfor %}
