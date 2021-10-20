@@ -1,9 +1,9 @@
-resource "signalfx_time_chart" "{{ terraformName }}" {
+resource "signalfx_time_chart" "{{ fmt_name }}" {
     name                = "{{ name }}"
     {% if description != "" %}
     description         = "{{ description }}"
     {% endif %}
-    plot_type           = "{{ options.type }}"
+    plot_type           = "{{ options.defaultPlotType }}"
     {% if options.unitPrefix %}
     unit_prefix         = "{{ options.unitPrefix }}"
     {% endif %}
@@ -11,76 +11,40 @@ resource "signalfx_time_chart" "{{ terraformName }}" {
     color_by            = "{{ options.colorBy }}"
     {% endif %}
     {% if options.programOptions and options.programOptions.minimumResolution %}
-    minimum_resolution  = {{ options.programOptions.minimumResolution }}
+    minimum_resolution  = "{{ options.programOptions.minimumResolution }}"
     {% endif %}
     {% if options.programOptions and options.programOptions.maxDelay %}
-    max_delay           = {{ options.programOptions.maxDelay }}
+    max_delay           = "{{ options.programOptions.maxDelay }}"
     {% endif %}
     {% if options.programOptions and options.programOptions.disableSampling %}
-    disable_sampling    = {{ options.programOptions.disableSampling }}
+    disable_sampling    = "{{ options.programOptions.disableSampling | lower }}"
     {% endif %}
     {% if options.time %}
       {% if options.time.range %}
-    time_range          = {{ options.time.range }}
+    time_range          = "{{ options.time.range }}"
       {% else %}
         {% if options.time.start %}
-    start_time          = {{ options.time.start }}
+    start_time          = "{{ options.time.start }}"
         {% endif %}
         {% if options.time.end %}
-    end_time            = {{ options.time.end }}
+    end_time            = "{{ options.time.end }}"
         {% endif %}
       {% endif %}
-    {% endif %}
-    axes_include_zero   = {{ options.includeZero }}
-    {% if options.axes | length > 0 %}
-    axis_left {
-      {% if options.axes[0].label %}
-      label = "{{ options.axes[0].label }}"
-      {% endif %}
-      {% if options.axes[0].highWatermark %}
-      high_watermark = {{ options.axes[0].highWatermark }}
-      {% endif %}
-      {% if options.axes[0].highWatermarkLabel %}
-      high_watermark_label = {{ options.axes[0].highWatermarkLabel }}
-      {% endif %}
-      {% if options.axes[0].lowWatermark %}
-      low_watermark = {{ options.axes[0].lowWatermark }}
-      {% endif %}
-      {% if options.axes[0].lowWatermarkLabel %}
-      low_watermark_label = {{ options.axes[0].lowWatermarkLabel }}
-      {% endif %}
-    }
-    {% endif %}
-    {% if options.axes | length > 0 %}
-    axis_right {
-      {% if options.axes[1].label %}
-      label = "{{ options.axes[1].label }}"
-      {% endif %}
-      {% if options.axes[1].highWatermark %}
-      high_watermark = {{ options.axes[1].highWatermark }}
-      {% endif %}
-      {% if options.axes[1].highWatermarkLabel %}
-      high_watermark_label = {{ options.axes[1].highWatermarkLabel }}
-      {% endif %}
-      {% if options.axes[1].lowWatermark %}
-      low_watermark = {{ options.axes[1].lowWatermark }}
-      {% endif %}
-      {% if options.axes[1].lowWatermarkLabel %}
-      low_watermark_label = {{ options.axes[1].lowWatermarkLabel }}
-      {% endif %}
-    }
     {% endif %}
 
     {% for vopts in options.publishLabelOptions %}
     viz_options {
       label = "{{ vopts.label }}"
       {% if vopts.paletteIndex %}
-      color = {{ resolve_color(vopts.paletteIndex) }}
+      color = "{{ resolve_time_color(vopts.paletteIndex) }}"
       {% endif %}
-      axis = {{ vopts.yAxis }}
+      {% if vopts.yAxis and vopts.yAxis != 0 %}
+      axis = "{{ vopts.yAxis }}"
+      {% endif %}
       {% if vopts.plotType %}
-      plot_type = {{ vopts.plotType }}
+      plot_type = "{{ vopts.plotType }}"
       {% endif %}
+      
       {% if vopts.valueUnit %}
       value_unit = "{{ vopts.valueUnit }}"
       {% endif %}
@@ -99,27 +63,18 @@ resource "signalfx_time_chart" "{{ terraformName }}" {
     }
     {% endif %}
 
-    {% if options.legendOptions and options.legendOptions.fields and options.legendOptions.fields | length > 0 %}
-    legend_fields_to_hide = [
-    {% for field in options.legendOptions.fields %}
-      {% if field.enabled %}
-      "{{ field.property }}",
-      {% endif %}
-    {% endfor %}
-    ]
-    {% endif %}
 
-
-    show_event_lines    = {{ options.showEventLines }}
+    show_event_lines    = "{{ options.showEventLines|lower }}"
     {% if options.areaChartOptions.showDataMarkers or options.lineChartOptions.showDataMarkers %}
     show_data_markers = True
     {% endif %}
-
-    max_precision       = {{ options.maximumPrecision }}
-    {% if refreshInterval %}
-    refresh_interval    = {{ refreshInterval }}
+    {% if options.maximumPrecision and options.maximumPrecision != "" %}
+      max_precision       = "{{ options.maximumPrecision }}"
     {% endif %}
-    {% if options.secondaryVisualization != "" %}
+    {% if refreshInterval %}
+    refresh_interval    = "{{ refreshInterval }}"
+    {% endif %}
+    {% if options.secondaryVisualization and options.secondaryVisualization != "" %}
     secondary_visualization = "{{ options.secondaryVisualization }}"
     {% endif %}
 

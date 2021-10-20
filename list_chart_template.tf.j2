@@ -1,4 +1,4 @@
-resource "signalfx_list_chart" "{{ terraformName }}" {
+resource "signalfx_list_chart" "{{ fmt_name }}" {
     name                = "{{ name }}"
     {% if description != "" %}
     description         = "{{ description }}"
@@ -6,15 +6,39 @@ resource "signalfx_list_chart" "{{ terraformName }}" {
     {% if options.colorBy != "" %}
     color_by            = "{{ options.colorBy }}"
     {% endif %}
-    max_precision       = {{ options.maximumPrecision }}
+    {% if options.colorScale2 and options.colorScale2 | length > 0 %}
+    {% for scale in options.colorScale2 %}
+    color_scale {
+        {% if scale.gt %}
+         gt = {{ scale.gt }}
+        {% endif %}
+        {% if scale.gte %}
+         gte = {{ scale.gte }}
+        {% endif %}
+        {% if scale.lt %}
+          lt = {{ scale.lt }}
+        {% endif %}
+        {% if scale.lte %}
+         lte = {{ scale.lte }}
+        {% endif %}
+        {% if resolve_color(scale.paletteIndex) %}
+        color = "{{ resolve_color(scale.paletteIndex) }}" 
+        {% endif %}
+    }
+    {% endfor %}
+    
+    {% endif %}
+    {% if options.maximumPrecision and options.maximumPrecision != "" %}
+    max_precision       = "{{ options.maximumPrecision }}"
+    {% endif %}
     {% if options.programOptions and options.programOptions.disableSampling %}
-    disable_sampling    = {{ options.programOptions.disableSampling }}
+    disable_sampling    = "{{ options.programOptions.disableSampling }}"
     {% endif %}
     {% if refreshInterval %}
-    refresh_interval    = {{ refreshInterval }}
+    refresh_interval    = "{{ refreshInterval }}"
     {% endif %}
     {% if options.programOptions and options.programOptions.maxDelay %}
-    max_delay           = {{ options.programOptions.maxDelay }}
+    max_delay           = "{{ options.programOptions.maxDelay }}"
     {% endif %}
     {% if options.unitPrefix %}
     unit_prefix         = "{{ options.unitPrefix }}"

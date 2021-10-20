@@ -1,4 +1,4 @@
-resource "signalfx_list_chart" "{{ terraformName }}" {
+resource "signalfx_text_chart" "{{ fmt_name }}" {
     name                = "{{ name }}"
     {% if description != "" %}
     description         = "{{ description }}"
